@@ -33,7 +33,7 @@ def get_parser():
 
 def make_dist_tab(fasta_querie, fasta_targets, nbThreads):
 
-	outputFile_name = ''.join(fasta_querie.split("_")[0:-1]) + "_dit.tsv"
+	outputFile_name = ''.join(fasta_querie.split("_")) + "_dit.tsv"
 	outputFile = open(outputFile_name,'w')
 
 	os.system("mash dist -t -p " + str(nbThreads) + " " + fasta_querie + \
