@@ -12,7 +12,7 @@ def get_parser():
 	parser.add_argument('-t', action="store", dest='MATRIX', 
 				type=str, required=True, help='mash matrix (REQUIRED)')
 	
-	parser.add_argument('-o', action="store", dest='OUTPUT',
+	parser.add_argument('-k', action="store", dest='OUTPUT',
 				type=str, default='output', help='output newick name (default:output)')    
 		
 	parser.add_argument('--NJ', dest='NJ', action='store_true',
@@ -46,9 +46,13 @@ def make_reroot_tree(tree):
 	return tree
 
 def write_reroot_tree(reroot_tree, output_file_name):
-	output_file = open(output_file_name + ".nwk",'w')
+	output_file = open(output_file_name, 'w')
 	output_file.write(reroot_tree.as_string("newick"))
+
 	output_file.close()
+
+	os.system("sed -i 's/\[&R\] //g' " + output_file_name)
+
 
 #main function    
 def main():
@@ -70,15 +74,7 @@ def main():
 
 	reroot_tree = make_reroot_tree(tree)
 	
-	output_file = write_reroot_tree(reroot_tree, Arguments.OUTPUT)
-	
-
-'''
-command = "sumtrees.py -F newick --root-target-at-midpoint \
---suppress-annotations --decimals=0 --percentages " + newick + \
-" > " + Arguments.OUTPUT + ".nwk"
-os.system(command)
-'''
+	output_file = write_reroot_tree(reroot_tree, Arguments.OUTPUT + '.nwk')
 
 if __name__ == "__main__":
     main()

@@ -4,25 +4,43 @@ import os, sys, time
 import argparse
 import copy
 from decimal import Decimal
+import dendropy
 
+
+##################################
+#####  Arguments definition  #####
+##################################
 
 
 def get_parser():
-	#FOnction permettant de pourvoir demander des arguments
+	#Fonction permettant de pourvoir demander des arguments
 
-	parser = argparse.ArgumentParser(description='Create NJ tree from ARTwork assemblies')
+	parser = argparse.ArgumentParser(description='Create mash matrix and rerooted taxonomic tree')
 
 	parser.add_argument('-f', action="store", dest='FASTA', 
 						type=str, required=True, nargs='+', help='FASTA files, more than 2 (REQUIRED)')
 
 	parser.add_argument('-o', action="store", dest='output', 
-						type=str, default='output', help='output name (default:output)')
+						type=str, default='output', help='output tsv name (default:output)')
 
 	parser.add_argument('-T', action="store", dest='nbThreads', 
 						type=int, default='1', help='maximum number of threads to use (default:1)')
 
+	#parser.add_argument('-t', action="store", dest='MATRIX', 
+	#			type=str, required=True, help='mash matrix (REQUIRED)')
+	
+	parser.add_argument('-k', action="store", dest='OUTPUT',
+				type=str, default='output', help='output newick name (default:output)')    
+		
+	parser.add_argument('--NJ', dest='NJ', action='store_true',
+				help='use neighbour joining algorithm (default:UPGMA)', default=False)
+
 	return parser
 
+
+###########################################
+#####  Create mash matrix (functions) #####
+###########################################
 
 
 def make_dist_tab(fasta_querie, fasta_targets, nbThreads):
@@ -88,7 +106,7 @@ def make_dist_matrix(distTable_files):
 		dico_result[seqId] = dicoSeq		
 
 
-	return dico_result			
+	return dico_result
 
 
 def write_dist_matrix(dicoDist, matrixFileName):
@@ -123,10 +141,56 @@ def write_dist_matrix(dicoDist, matrixFileName):
 	return new_dicoDist
 
 
-#main function	
+########################################################
+#####  Create rerooted taxonomic tree (functions)  #####
+########################################################
+
+def make_nj_tree(mash_matrix):
+	# Création de l'objet matrice à partir de la matrice au format tsv  obtenu avec Mash
+	# Création de l'arbre avec la méthode neighbour-Joining
+
+	pdm = dendropy.PhylogeneticDistanceMatrix.from_csv(src=open(mash_matrix), delimiter="\t")
+	tree = pdm.nj_tree()
+
+	return tree
+
+def make_upgma_tree(mash_matrix):
+	#Création de l'objet matrice à partir de la matrice au format tsv  obtenu avec Mash
+	#Création de l'arbre avec la méthode upgma
+
+	pdm = dendropy.PhylogeneticDistanceMatrix.from_csv(src=open(mash_matrix), delimiter="\t")
+	tree = pdm.upgma_tree()
+
+	return tree
+
+
+def make_reroot_tree(tree):
+	#Enracinement de l'arbre
+
+	tree.reroot_at_midpoint(update_bipartitions=False, suppress_unifurcations=False)
+
+	return tree
+
+def write_reroot_tree(reroot_tree, tree_file_name):
+	# Ecrit l'arbre dans le fichier tree_file_name
+	# Supprime l'expression '[&R] ' du fichier tree_file_name
+
+	tree_file = open(tree_file_name, 'w')
+	tree_file.write(reroot_tree.as_string("newick"))
+	tree_file.close()
+
+	os.system("sed -i 's/\[&R\] //g' " + tree_file_name)
+
+
+###########################
+#####  Main function  #####
+###########################
+
+
 def main():
 
 	##################### gets arguments #####################
+
 	parser=get_parser()
 	
 	#print parser.help if no arguments
@@ -137,12 +201,23 @@ def main():
 	# mettre tout les arguments dans la variable Argument
 	Arguments=parser.parse_args()
 
+    #####################  Create mash matrix  #####################
+
 	distTable_files = mash_dist_loop(Arguments.FASTA, Arguments.nbThreads)
 	distMatrix = make_dist_matrix(distTable_files)
 	distMatrix = write_dist_matrix(distMatrix, Arguments.output + '.tsv')
 
+	#####################  Create rerooted taxonomic tree  #####################
+
+	if Arguments.NJ :
+		tree = make_nj_tree(Arguments.output + '.tsv')
+	else :
+		tree = make_upgma_tree(Arguments.output + '.tsv')
+
+	reroot_tree = make_reroot_tree(tree)
+	
+	tree_file = write_reroot_tree(reroot_tree, Arguments.OUTPUT + '.nwk')
+
 # lancer la fonction main()  au lancement du script
 if __name__ == "__main__":
 	main()	            		
-
-
