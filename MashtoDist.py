@@ -4,17 +4,11 @@ import os, sys, time
 import argparse
 import copy
 from decimal import Decimal
-#import numpy as np
-#from scipy.cluster import hierarchy 
-#import matplotlib.pyplot as plt
+
 
 
 def get_parser():
-	"""
-	Parse arguments
-	@return arguments list
-	@rtype: parser object
-	"""
+	#FOnction permettant de pourvoir demander des arguments
 
 	parser = argparse.ArgumentParser(description='Create NJ tree from ARTwork assemblies')
 
@@ -32,8 +26,10 @@ def get_parser():
 
 
 def make_dist_tab(fasta_querie, fasta_targets, nbThreads):
+	# lance mash pour comparer fasta_querie avec tout les assemblages de le liste fasta_targets
+	# la sortie de mash est écrite dans outputFile_name
 
-	outputFile_name = ''.join(fasta_querie.split("_")) + "_dit.tsv"
+	outputFile_name = ''.join(fasta_querie.split("_")) + "_dist.tsv"
 	outputFile = open(outputFile_name,'w')
 
 	os.system("mash dist -t -p " + str(nbThreads) + " " + fasta_querie + \
@@ -45,7 +41,8 @@ def make_dist_tab(fasta_querie, fasta_targets, nbThreads):
 
 
 def mash_dist_loop(fasta_files, nbThreads):
-
+	# fonction qui lance make_dist_tab pour tous les génomes
+	# on récupére une liste de nom de fichiers comprenant toutes les sortie de mash 
 
 	distTable_files = []
 
@@ -60,6 +57,10 @@ def mash_dist_loop(fasta_files, nbThreads):
 
 
 def make_dist_matrix(distTable_files):
+	# ouvre tout les fichiers résultats de mash et stock les informations dans un dictionnaire
+	# ce distionnaire contient en clef [1] les id des génomes et en valeur un autre dictionnaire
+	# ce second dictionnaire contient en clef tout les id des génomes sauf ceux de la clef [1]
+	# et en valeur la distance mash 
 	
 	dico_result = {}
 
@@ -73,7 +74,7 @@ def make_dist_matrix(distTable_files):
 
 		for line in lines :
 
-			line = line.rstrip()
+			line = line.rstrip() # supprime retour chariot
 
 			if line[0]=="#" :
 				seqId = line.split('\t')[1].replace("_assembly.fasta",'')
@@ -91,12 +92,14 @@ def make_dist_matrix(distTable_files):
 
 
 def write_dist_matrix(dicoDist, matrixFileName):
+	# "transpose le dictionnaire dicoDist en une matrice dans le fichier matrixFileName"
 	
 	seqNames = dicoDist.keys()
 	new_dicoDist = {}
 
 	matrixFile = open(matrixFileName, 'w')
 
+	# écriture du header de la matrice
 	matrixFile.write('\t' + '\t'.join(seqNames) + '\n')
 
 	for seqName in dicoDist : 
@@ -105,32 +108,19 @@ def write_dist_matrix(dicoDist, matrixFileName):
 		new_dicoDist[seqName] = []
 
 		for name in seqNames :
-			if name not in dicoDist[seqName] :
+			# si name == seqName alors distance = 0
+			if name not in dicoDist[seqName] : # if name == seqName
 				matrixFile.write('\t0')
 				new_dicoDist[seqName].append(0)
 			else:
 				matrixFile.write('\t' + str(Decimal(dicoDist[seqName][name])))	
+				
 				new_dicoDist[seqName].append(float(Decimal(dicoDist[seqName][name])))
 
 		matrixFile.write('\n')		
 
 	matrixFile.close()
 	return new_dicoDist
-
-'''
-def matrix_to_array(matrix):
-
-	matrix_list = []
-
-	for element in matrix :
-		matrix_list.append(matrix[element])
-
-	array = np.array(matrix_list)
-	return array
-'''
-
-
-
 
 
 #main function	
@@ -144,12 +134,14 @@ def main():
 		parser.print_help()
 		sys.exit(1)
 	
+	# mettre tout les arguments dans la variable Argument
 	Arguments=parser.parse_args()
 
 	distTable_files = mash_dist_loop(Arguments.FASTA, Arguments.nbThreads)
 	distMatrix = make_dist_matrix(distTable_files)
 	distMatrix = write_dist_matrix(distMatrix, Arguments.output + '.tsv')
 
+# lancer la fonction main()  au lancement du script
 if __name__ == "__main__":
 	main()	            		
 
