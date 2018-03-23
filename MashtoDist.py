@@ -67,15 +67,21 @@ def make_sketch_files(input_file, nbThreads):
 		if len(path) == 1 :
 
 			sketch_file_name = "sketch/" + path[0].split('/')[-1].split('.')[0].replace("_assembly",'_sketch')
+
 			os.system("mash sketch -p " + str(nbThreads) + " -o " + sketch_file_name + " " + path[0])
+
 			sketch_files.append(sketch_file_name + ".msh")
 
 		else :
 	
 			cat_file_name = "concat_reads/" + path[0].split('/')[-1].replace("_R1",'_cat_reads')
+
 			os.system("cat " + path[0] + " " + path[1] + " > " + cat_file_name)
+
 			sketch_file_name = "sketch/" + cat_file_name.split('/')[-1].split('.')[0].replace("_cat_reads",'_sketch')
+
 			os.system("mash sketch -p " + str(nbThreads) + " -r -o " + sketch_file_name + " " + cat_file_name)
+			
 			sketch_files.append(sketch_file_name + ".msh")
 
 	return sketch_files
