@@ -21,7 +21,7 @@ def get_parser():
 	#					type=str, required=True, nargs='+', help='FASTA files, more than 2 (REQUIRED)')
 
 	parser.add_argument('-i', action="store", dest='input', 
-						type=str, required=True, help='TXT file containing path to reads or/and assembly (REQUIRED)')
+						type=str, required=True, help='TXT file containing path to reads or/and assembly, more than 2 (REQUIRED)')
 
 	parser.add_argument('-o', action="store", dest='output', 
 						type=str, default='output', help='output tsv name (default:output)')
@@ -50,9 +50,13 @@ def get_parser():
 
 
 def make_sketch_files(input_file, nbThreads):
+	#Fonction qui sketch chaque fichier que se soient des assemblages ou des reads
 	intFile = open (input_file, 'r')
 	paths = intFile.readlines()
 	intFile.close()
+
+	os.system("mkdir sketch")
+	os.system("mkdir concat_reads")
 
 	sketch_files = []
 
@@ -61,22 +65,17 @@ def make_sketch_files(input_file, nbThreads):
 		path = path.rstrip()
 		path = path.split("\t")
 		if len(path) == 1 :
-			sketch_file_name = path[0].replace("_assembly.fasta",'_sketch')
 
+			sketch_file_name = "sketch/" + path[0].split('/')[-1].split('.')[0].replace("_assembly",'_sketch')
 			os.system("mash sketch -p " + str(nbThreads) + " -o " + sketch_file_name + " " + path[0])
-
 			sketch_files.append(sketch_file_name + ".msh")
 
 		else :
 	
-			cat_file_name = path[0].replace("_R1",'_cat_reads')
-
+			cat_file_name = "concat_reads/" + path[0].split('/')[-1].replace("_R1",'_cat_reads')
 			os.system("cat " + path[0] + " " + path[1] + " > " + cat_file_name)
-
-			sketch_file_name = cat_file_name.replace("_cat_reads.fastq.gz",'_sketch')
-
+			sketch_file_name = "sketch/" + cat_file_name.split('/')[-1].split('.')[0].replace("_cat_reads",'_sketch')
 			os.system("mash sketch -p " + str(nbThreads) + " -r -o " + sketch_file_name + " " + cat_file_name)
-
 			sketch_files.append(sketch_file_name + ".msh")
 
 	return sketch_files
@@ -134,11 +133,13 @@ def make_dist_matrix(distTable_files):
 			line = line.rstrip() # supprime retour chariot
 
 			if line[0]=="#" :
-				seqId = line.split('\t')[1].replace("_assembly.fasta",'')
+				seqId = line.split('\t')[1].split('/')[-1].replace("_assembly.fasta",'')
+				seqId = seqId.replace("_cat_reads.fastq.gz",'')
 				dicoSeq = {}
 
 			else :	
-				seqName = line.split('\t')[0].replace("_assembly.fasta",'')
+				seqName = line.split('\t')[0].split('/')[-1].replace("_assembly.fasta",'')
+				seqName = seqName.replace("_cat_reads.fastq.gz",'')
 				dist = line.split('\t')[1]
 				dicoSeq[seqName] = dist	
 
@@ -243,7 +244,7 @@ def main():
 
     #####################  Create mash matrix  #####################
 
-	sketch_file_name = make_sketch_files(Arguments.input, Arguments.nbThreads)
+	sketch_files_name = make_sketch_files(Arguments.input, Arguments.nbThreads)
 	distTable_files = mash_dist_loop(sketch_files_name, Arguments.nbThreads)
 	distMatrix = make_dist_matrix(distTable_files)
 	distMatrix = write_dist_matrix(distMatrix, Arguments.output + '.tsv')
@@ -261,4 +262,4 @@ def main():
 
 # lancer la fonction main()  au lancement du script
 if __name__ == "__main__":
-	main()	            		
+	main()	            		           		
