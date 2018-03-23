@@ -17,8 +17,11 @@ def get_parser():
 
 	parser = argparse.ArgumentParser(description='Create mash matrix and rerooted taxonomic tree')
 
-	parser.add_argument('-f', action="store", dest='FASTA', 
-						type=str, required=True, nargs='+', help='FASTA files, more than 2 (REQUIRED)')
+	#parser.add_argument('-f', action="store", dest='FASTA', 
+	#					type=str, required=True, nargs='+', help='FASTA files, more than 2 (REQUIRED)')
+
+	parser.add_argument('-i', action="store", dest='input', 
+						type=str, required=True, help='TXT file containing path to reads or/and assembly (REQUIRED)')
 
 	parser.add_argument('-o', action="store", dest='output', 
 						type=str, default='output', help='output tsv name (default:output)')
@@ -26,14 +29,17 @@ def get_parser():
 	parser.add_argument('-T', action="store", dest='nbThreads', 
 						type=int, default='1', help='maximum number of threads to use (default:1)')
 
+	parser.add_argument('--S', action='store_true', dest='sketch',
+						help='suppress sketch files (default:True)', default=True)
+ 
 	#parser.add_argument('-t', action="store", dest='MATRIX', 
 	#			type=str, required=True, help='mash matrix (REQUIRED)')
 	
 	parser.add_argument('-k', action="store", dest='OUTPUT',
-				type=str, default='output', help='output newick name (default:output)')    
+						type=str, default='output', help='output newick name (default:output)')    
 		
 	parser.add_argument('--NJ', dest='NJ', action='store_true',
-				help='use neighbour joining algorithm (default:UPGMA)', default=False)
+						help='use neighbour joining algorithm (default:UPGMA)', default=False)
 
 	return parser
 
@@ -42,6 +48,39 @@ def get_parser():
 #####  Create mash matrix (functions) #####
 ###########################################
 
+
+def make_sketch_files(input_file, nbThreads):
+	intFile = open (input_file, 'r')
+	paths = intFile.readlines()
+	intFile.close()
+
+	sketch_files = []
+
+	for path in paths :
+
+		path = path.rstrip()
+		path = path.split("\t")
+		if len(path) == 1 :
+			sketch_file_name = path[0].replace("_assembly.fasta",'_sketch')
+
+			os.system("mash sketch -p " + str(nbThreads) + " -o " + sketch_file_name + " " + path[0])
+
+			sketch_files.append(sketch_file_name + ".msh")
+
+		else :
+	
+			cat_file_name = path[0].replace("_R1",'_cat_reads')
+
+			os.system("cat " + path[0] + " " + path[1] + " > " + cat_file_name)
+
+			sketch_file_name = cat_file_name.replace("_cat_reads.fastq.gz",'_sketch')
+
+			os.system("mash sketch -p " + str(nbThreads) + " -r -o " + sketch_file_name + " " + cat_file_name)
+
+			sketch_files.append(sketch_file_name + ".msh")
+
+	return sketch_files
+	
 
 def make_dist_tab(fasta_querie, fasta_targets, nbThreads):
 	# lance mash pour comparer fasta_querie avec tout les assemblages de le liste fasta_targets
@@ -58,18 +97,18 @@ def make_dist_tab(fasta_querie, fasta_targets, nbThreads):
 	return outputFile_name
 
 
-def mash_dist_loop(fasta_files, nbThreads):
+def mash_dist_loop(sketch_files, nbThreads):
 	# fonction qui lance make_dist_tab pour tous les génomes
 	# on récupére une liste de nom de fichiers comprenant toutes les sortie de mash 
 
 	distTable_files = []
 
-	for fasta_file in fasta_files :
+	for sketch_file in sketch_files :
 
-		fasta_targets = copy.copy(fasta_files)
-		fasta_targets.remove(fasta_file)
+		sketch_targets = copy.copy(sketch_files)
+		sketch_targets.remove(sketch_file)
 
-		distTable_files.append(make_dist_tab(fasta_file, fasta_targets, nbThreads))
+		distTable_files.append(make_dist_tab(sketch_file, sketch_targets, nbThreads))
 
 	return 	distTable_files
 
@@ -107,6 +146,8 @@ def make_dist_matrix(distTable_files):
 
 
 	return dico_result
+
+
 
 
 def write_dist_matrix(dicoDist, matrixFileName):
@@ -172,8 +213,7 @@ def make_reroot_tree(tree):
 	return tree
 
 def write_reroot_tree(reroot_tree, tree_file_name):
-	# Ecrit l'arbre dans le fichier tree_file_name
-	# Supprime l'expression '[&R] ' du fichier tree_file_name
+	# Transpose l'arbre dans le fichier tree_file_name
 
 	tree_file = open(tree_file_name, 'w')
 	tree_file.write(reroot_tree.as_string("newick"))
@@ -203,7 +243,8 @@ def main():
 
     #####################  Create mash matrix  #####################
 
-	distTable_files = mash_dist_loop(Arguments.FASTA, Arguments.nbThreads)
+	sketch_file_name = make_sketch_files(Arguments.input, Arguments.nbThreads)
+	distTable_files = mash_dist_loop(sketch_files_name, Arguments.nbThreads)
 	distMatrix = make_dist_matrix(distTable_files)
 	distMatrix = write_dist_matrix(distMatrix, Arguments.output + '.tsv')
 
