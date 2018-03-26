@@ -21,7 +21,8 @@ def get_parser():
 	#					type=str, required=True, nargs='+', help='FASTA files, more than 2 (REQUIRED)')
 
 	parser.add_argument('-i', action="store", dest='input', 
-						type=str, required=True, help='TXT file containing path to reads or/and assembly, more than 2 (REQUIRED)')
+						type=str, required=True,
+						help='TXT file containing path to reads or/and assembly, more than 2 (REQUIRED)')
 
 	parser.add_argument('-o', action="store", dest='output', 
 						type=str, default='output', help='output tsv name (default:output)')
@@ -30,12 +31,21 @@ def get_parser():
 						type=int, default='1', help='maximum number of threads to use (default:1)')
 
 	parser.add_argument('--S', action='store_true', dest='sketch',
-						help='suppress sketch files (default:True)', default=True)
+						help='suppress sketch files (default:False)', default=False)
  
+	parser.add_argument('--C', action='store_false', dest='concat_reads',
+						help='supress concatenated reads files (default:True)', default=True)
+
+	parser.add_argument('-k', action="store", dest='kmer_size', 
+						type=int, default='21', help='k-mer size (1-32) (default:21)')
+
+	parser.add_argument('-s', action="store", dest='sketch_size', 
+						type=int, default='1000', help='sketch size (default:1000)')
+
 	#parser.add_argument('-t', action="store", dest='MATRIX', 
 	#			type=str, required=True, help='mash matrix (REQUIRED)')
 	
-	parser.add_argument('-k', action="store", dest='OUTPUT',
+	parser.add_argument('-e', action="store", dest='OUTPUT',
 						type=str, default='output', help='output newick name (default:output)')    
 		
 	parser.add_argument('--NJ', dest='NJ', action='store_true',
@@ -49,8 +59,9 @@ def get_parser():
 ###########################################
 
 
-def make_sketch_files(input_file, nbThreads):
-	#Fonction qui sketch chaque fichier que se soient des assemblages ou des reads
+def make_sketch_files(input_file, nbThreads, kmer_size, sketch_size):
+	#Fonction qui ajoute les fichiers .msh à la liste sktech_files
+	# et qui sketch chaque fichier que se soient des assemblages ou des reads
 	intFile = open (input_file, 'r')
 	paths = intFile.readlines()
 	intFile.close()
@@ -64,25 +75,34 @@ def make_sketch_files(input_file, nbThreads):
 
 		path = path.rstrip()
 		path = path.split("\t")
-		if len(path) == 1 :
 
-			sketch_file_name = "sketch/" + path[0].split('/')[-1].split('.')[0].replace("_assembly",'_sketch')
+		if path[0].split('/')[-1].split('.')[-1] != "msh" :
 
-			os.system("mash sketch -p " + str(nbThreads) + " -o " + sketch_file_name + " " + path[0])
+			if len(path) == 1 :
 
-			sketch_files.append(sketch_file_name + ".msh")
+					sketch_file_name = "sketch/" + path[0].split('/')[-1].split('.')[0].replace("_assembly",'_sketch')
+
+					os.system("mash sketch -p " + str(nbThreads) + " -k " + str(kmer_size) + \
+						" -s " + str(sketch_size) + " -o " + sketch_file_name + " " + path[0])
+
+					sketch_files.append(sketch_file_name + ".msh")
+
+			else :
+	
+					cat_file_name = "concat_reads/" + path[0].split('/')[-1].replace("_R1",'_cat_reads')
+
+					os.system("cat " + path[0] + " " + path[1] + " > " + cat_file_name)
+				
+					sketch_file_name = "sketch/" + cat_file_name.split('/')[-1].split('.')[0].replace("_cat_reads",'_sketch')
+
+					os.system("mash sketch -p " + str(nbThreads) + " -k " + str(kmer_size) + " -s " + \
+						str(sketch_size) + " -r -o " + sketch_file_name + " " + cat_file_name)
+				
+					sketch_files.append(sketch_file_name + ".msh")
 
 		else :
-	
-			cat_file_name = "concat_reads/" + path[0].split('/')[-1].replace("_R1",'_cat_reads')
 
-			os.system("cat " + path[0] + " " + path[1] + " > " + cat_file_name)
-
-			sketch_file_name = "sketch/" + cat_file_name.split('/')[-1].split('.')[0].replace("_cat_reads",'_sketch')
-
-			os.system("mash sketch -p " + str(nbThreads) + " -r -o " + sketch_file_name + " " + cat_file_name)
-			
-			sketch_files.append(sketch_file_name + ".msh")
+			sketch_files.append(path[0])
 
 	return sketch_files
 	
@@ -188,6 +208,18 @@ def write_dist_matrix(dicoDist, matrixFileName):
 	matrixFile.close()
 	return new_dicoDist
 
+def supress_sketch_files():
+	#Fonction qui suprime les fichers sketch
+
+	os.system("rm sketch/*")
+	os.system("rmdir sketch/")
+
+def supress_cat_files():
+	#Fonction qui suprime les fichiers concaténés des reads
+
+	os.system("rm concat_reads/*")
+	os.system("rmdir concat_reads/")
+
 
 ########################################################
 #####  Create rerooted taxonomic tree (functions)  #####
@@ -250,7 +282,7 @@ def main():
 
     #####################  Create mash matrix  #####################
 
-	sketch_files_name = make_sketch_files(Arguments.input, Arguments.nbThreads)
+	sketch_files_name = make_sketch_files(Arguments.input, Arguments.nbThreads, Arguments.kmer_size, Arguments.sketch_size)
 	distTable_files = mash_dist_loop(sketch_files_name, Arguments.nbThreads)
 	distMatrix = make_dist_matrix(distTable_files)
 	distMatrix = write_dist_matrix(distMatrix, Arguments.output + '.tsv')
@@ -265,6 +297,12 @@ def main():
 	reroot_tree = make_reroot_tree(tree)
 	
 	tree_file = write_reroot_tree(reroot_tree, Arguments.OUTPUT + '.nwk')
+
+	if Arguments.sketch :
+		supress_sketch = supress_sketch_files()
+
+	if Arguments.concat_reads :
+		supress_cat = supress_cat_files()
 
 # lancer la fonction main()  au lancement du script
 if __name__ == "__main__":
