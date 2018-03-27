@@ -5,6 +5,7 @@ import argparse
 import copy
 from decimal import Decimal
 import dendropy
+import re
 
 
 ##################################
@@ -32,15 +33,12 @@ def get_parser():
 
 	parser.add_argument('--S', action='store_true', dest='sketch',
 						help='suppress sketch files (default:False)', default=False)
- 
-	parser.add_argument('--C', action='store_false', dest='concat_reads',
-						help='supress concatenated reads files (default:True)', default=True)
 
 	parser.add_argument('-k', action="store", dest='kmer_size', 
 						type=int, default='21', help='k-mer size (1-32) (default:21)')
 
 	parser.add_argument('-s', action="store", dest='sketch_size', 
-						type=int, default='1000', help='sketch size (default:1000)')
+						type=int, default='1000', help='sketch size = number of k-mer (default:1000)')
 
 	#parser.add_argument('-t', action="store", dest='MATRIX', 
 	#			type=str, required=True, help='mash matrix (REQUIRED)')
@@ -62,12 +60,21 @@ def get_parser():
 def make_sketch_files(input_file, nbThreads, kmer_size, sketch_size):
 	#Fonction qui ajoute les fichiers .msh à la liste sktech_files
 	# et qui sketch chaque fichier que se soient des assemblages ou des reads
+	#Si pas de fichiers .msh, ne cré pas de dossier sketch
 	intFile = open (input_file, 'r')
 	paths = intFile.readlines()
 	intFile.close()
 
-	os.system("mkdir sketch")
-	os.system("mkdir concat_reads")
+	list_end = []
+
+	for path in paths :
+	
+		list_end.append(path.split('.')[-1])
+
+	end = ''.join(list_end)
+
+	if re.search (r"msh", end) is None :
+		os.system("mkdir sketch")
 
 	sketch_files = []
 
@@ -76,10 +83,9 @@ def make_sketch_files(input_file, nbThreads, kmer_size, sketch_size):
 		path = path.rstrip()
 		path = path.split("\t")
 
-		if path[0].split('/')[-1].split('.')[-1] != "msh" :
+		if path[0].split('.')[-1] != "msh" :
 
 			if len(path) == 1 :
-
 					sketch_file_name = "sketch/" + path[0].split('/')[-1].split('.')[0].replace("_assembly",'_sketch')
 
 					os.system("mash sketch -p " + str(nbThreads) + " -k " + str(kmer_size) + \
@@ -88,8 +94,7 @@ def make_sketch_files(input_file, nbThreads, kmer_size, sketch_size):
 					sketch_files.append(sketch_file_name + ".msh")
 
 			else :
-	
-					cat_file_name = "concat_reads/" + path[0].split('/')[-1].replace("_R1",'_cat_reads')
+					cat_file_name = path[0].split('/')[-1].replace("_R1",'_cat_reads')
 
 					os.system("cat " + path[0] + " " + path[1] + " > " + cat_file_name)
 				
@@ -99,6 +104,8 @@ def make_sketch_files(input_file, nbThreads, kmer_size, sketch_size):
 						str(sketch_size) + " -r -o " + sketch_file_name + " " + cat_file_name)
 				
 					sketch_files.append(sketch_file_name + ".msh")
+
+					os.system ("rm " + cat_file_name)
 
 		else :
 
@@ -214,12 +221,6 @@ def supress_sketch_files():
 	os.system("rm sketch/*")
 	os.system("rmdir sketch/")
 
-def supress_cat_files():
-	#Fonction qui suprime les fichiers concaténés des reads
-
-	os.system("rm concat_reads/*")
-	os.system("rmdir concat_reads/")
-
 
 ########################################################
 #####  Create rerooted taxonomic tree (functions)  #####
@@ -300,9 +301,6 @@ def main():
 
 	if Arguments.sketch :
 		supress_sketch = supress_sketch_files()
-
-	if Arguments.concat_reads :
-		supress_cat = supress_cat_files()
 
 # lancer la fonction main()  au lancement du script
 if __name__ == "__main__":
