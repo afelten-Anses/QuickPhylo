@@ -23,7 +23,7 @@ def get_parser():
 
 	parser.add_argument('-i', action="store", dest='input', 
 						type=str, required=True,
-						help='TXT file containing path to reads or/and assembly, more than 2 (REQUIRED)')
+						help='tsv file containing paths to reads, assembly or/and sketch files more than 2 (REQUIRED)')
 
 	parser.add_argument('-o', action="store", dest='output', 
 						type=str, default='output', help='output tsv name (default:output)')
@@ -86,26 +86,25 @@ def make_sketch_files(input_file, nbThreads, kmer_size, sketch_size):
 		if path[0].split('.')[-1] != "msh" :
 
 			if len(path) == 1 :
-					sketch_file_name = "sketch/" + path[0].split('/')[-1].split('.')[0].replace("_assembly",'_sketch')
+				sketch_file_name = "sketch/" + path[0].split('/')[-1].split('.')[0].replace("_assembly",'_sketch')
 
-					os.system("mash sketch -p " + str(nbThreads) + " -k " + str(kmer_size) + \
-						" -s " + str(sketch_size) + " -o " + sketch_file_name + " " + path[0])
-
-					sketch_files.append(sketch_file_name + ".msh")
+				os.system("mash sketch -p " + str(nbThreads) + " -k " + str(kmer_size) + \
+					" -s " + str(sketch_size) + " -o " + sketch_file_name + " " + path[0])
+				sketch_files.append(sketch_file_name + ".msh")
 
 			else :
-					cat_file_name = path[0].split('/')[-1].replace("_R1",'_cat_reads')
+				cat_file_name = path[0].split('/')[-1].replace("_R1",'_cat_reads')
 
-					os.system("cat " + path[0] + " " + path[1] + " > " + cat_file_name)
+				os.system("cat " + path[0] + " " + path[1] + " > " + cat_file_name)
+
+				sketch_file_name = "sketch/" + cat_file_name.split('/')[-1].split('.')[0].replace("_cat_reads",'_sketch')
+
+				os.system("mash sketch -p " + str(nbThreads) + " -k " + str(kmer_size) + " -s " + \
+					str(sketch_size) + " -r -o " + sketch_file_name + " " + cat_file_name)
 				
-					sketch_file_name = "sketch/" + cat_file_name.split('/')[-1].split('.')[0].replace("_cat_reads",'_sketch')
+				sketch_files.append(sketch_file_name + ".msh")
 
-					os.system("mash sketch -p " + str(nbThreads) + " -k " + str(kmer_size) + " -s " + \
-						str(sketch_size) + " -r -o " + sketch_file_name + " " + cat_file_name)
-				
-					sketch_files.append(sketch_file_name + ".msh")
-
-					os.system ("rm " + cat_file_name)
+				os.system ("rm " + cat_file_name)
 
 		else :
 
