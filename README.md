@@ -7,7 +7,7 @@ Workflow
 ========
 This workflow aims to build a root tree with mash and dendropy. To make the root tree, two methods are available : UPGMA and nNeighbourg-Joining . The script can takes assembly, reads (compressed or not) or sketch files in input. Mash sketch, sketch each fasta and fastq files into msh files. Then mash dist create a distance matrix based on jaccard index at tsv format with previous sketch files and files already sketch. Finally dendropy produce in output a newick file with the root tree. 
 
-![](workflow.PNG?raw=true "workflow")
+![](workflow.jpg?raw=true "workflow")
 
 Dependencies
 ============
