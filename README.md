@@ -1,8 +1,10 @@
 README
 ======
 Authors: Arnaud Felten, Pauline Barbet
+
 Afiliation: [Food Safety Laboratory - ANSES Maisons Alfort (France)](https://www.anses.fr/en/content/laboratory-food-safety-maisons-alfort-and-boulogne-sur-mer)
-You can find the latest version of the tool at(https://github.com/afelten-Anses/QuickPhylo)
+
+You can find the latest version of the tool at [https://github.com/afelten-Anses/QuickPhylo](https://github.com/afelten-Anses/QuickPhylo)
 
 
 Workflow
@@ -43,5 +45,7 @@ Test
 ====
 
 You can test the script whith the command lines :
-		cd test
-		python MashtoDist -T nbThreads -i input.tsv -o matrix_name -e tree_name
+
+	cd test
+	python MashtoDist -T nbThreads -i input.tsv -o matrix_name -e tree_name
+
