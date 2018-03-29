@@ -1,6 +1,6 @@
 README
 ======
-Authors: Arnaud Felten, Pauline Barbet
+Authors: Pauline Barbet, Arnaud Felten
 
 Afiliation: [Food Safety Laboratory - ANSES Maisons Alfort (France)](https://www.anses.fr/en/content/laboratory-food-safety-maisons-alfort-and-boulogne-sur-mer)
 
@@ -9,7 +9,7 @@ You can find the latest version of the tool at [https://github.com/afelten-Anses
 
 Workflow
 ========
-This workflow aims to faslty build a root tree with mash and dendropy. To make the root tree, two methods are available : UPGMA and nNeighbourg-Joining . The script can takes assembly, reads (compressed or not) or sketch files in input. Mash sketch, sketch each fasta and fastq files into msh files. Then mash dist create a distance matrix based on jaccard index at tsv format with previous sketch files and files already sketch. Finally dendropy produce in output a newick file with the root tree. 
+This workflow aims to faslty build a root tree with Mash and dendropy. To make the root tree, two methods are available : UPGMA and nNeighbourg-Joining. The script can takes in input assembly, reads (compressed or not) or sketch files. The Mash sketch function, sketch each fasta and fastq files into msh files. Then, the mash dist function create a distance matrix based on jaccard index at tsv format with previous sketch files and files already sketch. Finally dendropy produce in output a newick file with the root tree. 
 
 ![](workflow.JPG?raw=true "script workflow")
 
@@ -29,7 +29,7 @@ Parameters
 
 ## Parameters
 
-* -i : tsv file containing paths to reads or/and asssemly or/and sketched files, more than 2 (REQUIRED)
+* -i : tsv file containing paths to reads, asssemly or/and sketched files, more than 2 (REQUIRED)
 * -o : output tsv matrix name  (default:output)
 * -T : maximum number of threads to use (default:1)
 * -k : k-mer size for sketching (default:21)
@@ -44,8 +44,9 @@ Parameters
 Test
 ====
 
-After install mash and dendropy you can test the script whith the command lines :
+After installing Mash and dendropy you can test the script whith the command lines :
 
+	mkdir test
 	cd test
 	python MashtoDist.py -T nbThreads -i input.tsv -o matrix_name -e tree_name
 
