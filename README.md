@@ -9,14 +9,14 @@ You can find the latest version of the tool at [https://github.com/afelten-Anses
 
 Workflow
 ========
-This workflow aims to faslty build a root tree with Mash and dendropy. To make the root tree, two methods are available : UPGMA and nNeighbourg-Joining. The script can takes in input assembly, reads (compressed or not) or sketch files. The Mash sketch function, sketch each fasta and fastq files into msh files. Then, the mash dist function create a distance matrix based on jaccard index at tsv format with previous sketch files and files already sketch. Finally dendropy produce in output a newick file with the root tree. 
+This workflow aims to faslty build a root tree with Mash and dendropy. To make the root tree, two methods are available : UPGMA and nNeighbourg-Joining. The script takes in input, assembly, reads (compressed or not) and sketch files. The Mash sketch function, sketch each fasta and fastq files into msh files. Then, the Mash dist function create a distance matrix based on jaccard index at tsv format with previous sketch files and files already sketch. Finally dendropy produce in output a newick file with the root tree. 
 
 ![](workflow.JPG?raw=true "script workflow")
 
 Dependencies
 ============
 
-The script has been devlopped with python 2.7 (tested with 2.7.12)
+The script has been developped with python 2.7 (tested with 2.7.12)
 
 ## Expernal dependencies
 
