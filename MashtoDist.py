@@ -90,6 +90,7 @@ def make_sketch_files(input_file, nbThreads, kmer_size, sketch_size):
 
 				os.system("mash sketch -p " + str(nbThreads) + " -k " + str(kmer_size) + \
 					" -s " + str(sketch_size) + " -o " + sketch_file_name + " " + path[0])
+				
 				sketch_files.append(sketch_file_name + ".msh")
 
 			else :
@@ -268,6 +269,7 @@ def write_reroot_tree(reroot_tree, tree_file_name):
 
 def main():
 
+	begin = time.time()
 	##################### gets arguments #####################
 
 	parser=get_parser()
@@ -301,6 +303,10 @@ def main():
 	if Arguments.sketch :
 		supress_sketch = supress_sketch_files()
 
+	end = time.time()
+	total = end - begin
+	print "Temps d'éxécution: " + str(total) + " secondes"
+
 # lancer la fonction main()  au lancement du script
 if __name__ == "__main__":
-	main()	            		           		
+	main()	     
