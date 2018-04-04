@@ -2,16 +2,16 @@ README
 ======
 Authors: Pauline Barbet, Arnaud Felten
 
-Afiliation: [Food Safety Laboratory - ANSES Maisons Alfort (France)](https://www.anses.fr/en/content/laboratory-food-safety-maisons-alfort-and-boulogne-sur-mer)
+Affiliation: [Food Safety Laboratory - ANSES Maisons Alfort (France)](https://www.anses.fr/en/content/laboratory-food-safety-maisons-alfort-and-boulogne-sur-mer)
 
 You can find the latest version of the tool at [https://github.com/afelten-Anses/QuickPhylo](https://github.com/afelten-Anses/QuickPhylo)
 
 
 Workflow
 ========
-This workflow aims to fastly build a root tree with Mash and dendropy. To make the root tree, two methods are available : UPGMA and Neighbourg-Joining (NJ).
+This workflow aims to fastly build a root tree with Mash and dendropy. To make the root tree, two methods are available: UPGMA and Neighbourg-Joining (NJ).
 
-The script takes in input, assembly, reads (compressed or not) and sketch files.
+The script takes in input assembly, reads (compressed or not) and sketch files.
 
 The Mash sketch function, sketch each fasta and fastq files into msh files.
 
@@ -24,7 +24,7 @@ Finally dendropy produce in output a newick file with the root tree.
 Dependencies
 ============
 
-The script has been developped with python 2.7 (tested with 2.7.12)
+The script has been developed with python 2.7 (tested with 2.7.12)
 
 ## External dependencies
 
@@ -37,8 +37,8 @@ Parameters
 
 ## Parameters
 
-* -i : tsv file containing paths to reads, asssemly or/and sketched files, more than 2 (REQUIRED)
-* -o : output tsv matrix name  (default:output)
+* -i : tsv file containing paths to reads, asssembly or/and sketched files, more than 2 (REQUIRED)
+* -o : output tsv matrix name (default:output)
 * -T : maximum number of threads to use (default:1)
 * -k : k-mer size for sketching (default:21)
 * -s : sketch size = number of k-mer (default:1000)
@@ -46,13 +46,13 @@ Parameters
 
 ## Options
 
-* --S : supress sketch files (defaut:False)
-* --NJ : use neighbour joinning algorithm (defaut:UPGMA)
+* --S : suppress sketch files (default:False)
+* --NJ : use neighbour joining algorithm (default:UPGMA)
 
 Test
 ====
 
-After installing Mash and dendropy you can test the script whith the command lines :
+After installing Mash and dendropy you can test the script with the command lines:
 
 	mkdir test
 	cd test
