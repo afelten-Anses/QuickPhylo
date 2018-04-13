@@ -286,19 +286,21 @@ def main():
 	Arguments=parser.parse_args()
 
     #####################  Create mash matrix  #####################
-
+	
 	sketch_files_name = make_sketch_files(Arguments.input, Arguments.nbThreads, Arguments.kmer_size, Arguments.sketch_size)
+	
+
+	
 	distTable_files = mash_dist_loop(sketch_files_name, Arguments.nbThreads)
 	distMatrix = make_dist_matrix(distTable_files)
 	distMatrix = write_dist_matrix(distMatrix, Arguments.output + '.tsv')
 
 	#####################  Create rerooted taxonomic tree  #####################
-
 	if Arguments.NJ :
 		tree = make_nj_tree(Arguments.output + '.tsv')
 	else :
 		tree = make_upgma_tree(Arguments.output + '.tsv')
-
+	
 	reroot_tree = make_reroot_tree(tree)
 	
 	tree_file = write_reroot_tree(reroot_tree, Arguments.OUTPUT + '.nwk')
@@ -308,7 +310,7 @@ def main():
 
 	end = time.time()
 	total = round(end - begin,3)
-	print "Temps d'éxécution: " + str(total) + " secondes"
+	print "Temps d'éxécution total: " + str(total) + " secondes"
 
 # lancer la fonction main()  au lancement du script
 if __name__ == "__main__":
