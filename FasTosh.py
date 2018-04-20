@@ -47,7 +47,7 @@ def get_parser():
 						type=str, default='output', help='output newick name (default:output)')    
 		
 	parser.add_argument('--UPGMA', dest='UPGMA', action='store_true',
-						help='use neighbour joining algorithm (default:NJ)', default=False)
+						help='use UPGMA algorithm (default:NJ)', default=False)
 
 	return parser
 

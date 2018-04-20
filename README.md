@@ -47,7 +47,7 @@ Parameters
 ## Options
 
 * --S : suppress sketch files (default:False)
-* --NJ : use neighbour joining algorithm (default:UPGMA)
+* --UPGMA : use UPGMA algorithm (default:NJ)
 
 Test
 ====
