@@ -46,8 +46,8 @@ def get_parser():
 	parser.add_argument('-e', action="store", dest='OUTPUT',
 						type=str, default='output', help='output newick name (default:output)')    
 		
-	parser.add_argument('--NJ', dest='NJ', action='store_true',
-						help='use neighbour joining algorithm (default:UPGMA)', default=False)
+	parser.add_argument('--UPGMA', dest='UPGMA', action='store_true',
+						help='use neighbour joining algorithm (default:NJ)', default=False)
 
 	return parser
 
@@ -251,7 +251,7 @@ def make_reroot_tree(tree):
 		tree.reroot_at_midpoint(update_bipartitions=False, suppress_unifurcations=False)
 
 	except AssertionError:
-		print "Le midpoint n'a pas ete effectue"	
+		print "Le midpoint n'a pas été effectué"	
 
 	return tree
 
@@ -288,18 +288,16 @@ def main():
     #####################  Create mash matrix  #####################
 	
 	sketch_files_name = make_sketch_files(Arguments.input, Arguments.nbThreads, Arguments.kmer_size, Arguments.sketch_size)
-	
-
-	
 	distTable_files = mash_dist_loop(sketch_files_name, Arguments.nbThreads)
 	distMatrix = make_dist_matrix(distTable_files)
 	distMatrix = write_dist_matrix(distMatrix, Arguments.output + '.tsv')
 
 	#####################  Create rerooted taxonomic tree  #####################
-	if Arguments.NJ :
-		tree = make_nj_tree(Arguments.output + '.tsv')
-	else :
+	
+	if Arguments.UPGMA :
 		tree = make_upgma_tree(Arguments.output + '.tsv')
+	else :
+		tree = make_nj_tree(Arguments.output + '.tsv')
 	
 	reroot_tree = make_reroot_tree(tree)
 	
