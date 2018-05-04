@@ -49,6 +49,9 @@ def get_parser():
 	parser.add_argument('--UPGMA', dest='UPGMA', action='store_true',
 						help='use UPGMA algorithm (default:NJ)', default=False)
 
+	parser.add_argument('--nbKmerDiff', dest='nbKmerDiff', action='store_true',
+                     help='use the number of different kmer as distance instead of mash distance', default=False)
+
 	return parser
 
 
@@ -113,22 +116,27 @@ def make_sketch_files(input_file, nbThreads, kmer_size, sketch_size):
 	return sketch_files
 	
 
-def make_dist_tab(fasta_querie, fasta_targets, nbThreads):
+def make_dist_tab(fasta_querie, fasta_targets, nbThreads, mashDist):
 	# lance mash pour comparer fasta_querie avec tout les assemblages de le liste fasta_targets
 	# la sortie de mash est écrite dans outputFile_name
 
 	outputFile_name = ''.join(fasta_querie.split("_")) + "_dist.tsv"
 	outputFile = open(outputFile_name,'w')
 
-	os.system("mash dist -t -p " + str(nbThreads) + " " + fasta_querie + \
-		" " + " ".join(fasta_targets) + " > " + outputFile_name)
+	if mashDist :
+		os.system("mash dist -t -p " + str(nbThreads) + " " + fasta_querie + \
+			" " + " ".join(fasta_targets) + " > " + outputFile_name)
+
+	else :
+		os.system("mash dist -p " + str(nbThreads) + " " + fasta_querie +
+                    " " + " ".join(fasta_targets) + " > " + outputFile_name)
 
 	outputFile.close()
 
 	return outputFile_name
 
 
-def mash_dist_loop(sketch_files, nbThreads):
+def mash_dist_loop(sketch_files, nbThreads, mashDist):
 	# fonction qui lance make_dist_tab pour tous les génomes
 	# on récupére une liste de nom de fichiers comprenant toutes les sortie de mash 
 
@@ -139,12 +147,12 @@ def mash_dist_loop(sketch_files, nbThreads):
 		sketch_targets = copy.copy(sketch_files)
 		sketch_targets.remove(sketch_file)
 
-		distTable_files.append(make_dist_tab(sketch_file, sketch_targets, nbThreads))
+		distTable_files.append(make_dist_tab(sketch_file, sketch_targets, nbThreads, mashDist))
 
 	return 	distTable_files
 
 
-def make_dist_matrix(distTable_files):
+def make_dist_matrix(distTable_files, mashDist):
 	# ouvre tout les fichiers résultats de mash et stock les informations dans un dictionnaire
 	# ce distionnaire contient en clef [1] les id des génomes et en valeur un autre dictionnaire
 	# ce second dictionnaire contient en clef tout les id des génomes sauf ceux de la clef [1]
@@ -172,15 +180,20 @@ def make_dist_matrix(distTable_files):
 			else :	
 				seqName = line.split('\t')[0].split('/')[-1].replace("_assembly.fasta",'')
 				seqName = seqName.replace("_cat_reads.fastq.gz",'')
-				dist = line.split('\t')[1]
+
+				if mashDist :
+					dist = line.split('\t')[1]
+				else :
+					nbKmerIdentical = int(line.split('\t')[3].split('/')[0])
+					nbKmerTotal = int(line.split('\t')[3].split('/')[1])
+					dist = str(nbKmerTotal - nbKmerIdentical)
+					
 				dicoSeq[seqName] = dist	
 
 		dico_result[seqId] = dicoSeq		
 
 
 	return dico_result
-
-
 
 
 def write_dist_matrix(dicoDist, matrixFileName):
@@ -243,7 +256,6 @@ def make_upgma_tree(mash_matrix):
 
 	return tree
 
-
 def make_reroot_tree(tree):
 	#Enracinement de l'arbre
 
@@ -284,12 +296,16 @@ def main():
 	
 	# mettre tout les arguments dans la variable Argument
 	Arguments=parser.parse_args()
+	if Arguments.nbKmerDiff :
+		mashDist = False
+	else :
+		mashDist = True
 
     #####################  Create mash matrix  #####################
 	
 	sketch_files_name = make_sketch_files(Arguments.input, Arguments.nbThreads, Arguments.kmer_size, Arguments.sketch_size)
-	distTable_files = mash_dist_loop(sketch_files_name, Arguments.nbThreads)
-	distMatrix = make_dist_matrix(distTable_files)
+	distTable_files = mash_dist_loop(sketch_files_name, Arguments.nbThreads, mashDist)
+	distMatrix = make_dist_matrix(distTable_files, mashDist)
 	distMatrix = write_dist_matrix(distMatrix, Arguments.output + '.tsv')
 
 	#####################  Create rerooted taxonomic tree  #####################
