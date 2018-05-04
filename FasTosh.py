@@ -191,6 +191,9 @@ def make_dist_matrix(distTable_files, mashDist):
 					nbKmerIdentical = int(line.split('\t')[4].split('/')[0])
 					nbKmerTotal = int(line.split('\t')[4].split('/')[1])
 					dist = str(nbKmerTotal - nbKmerIdentical)
+					print line
+					print seqId + " --> " + seqName
+					print str(nbKmerTotal) + " - " + str(nbKmerIdentical)
 					
 				dicoSeq[seqName] = dist	
 
