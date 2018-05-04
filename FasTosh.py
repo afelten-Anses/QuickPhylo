@@ -178,16 +178,17 @@ def make_dist_matrix(distTable_files, mashDist):
 
 			else :	
 
-				if not mashDist :
-					seqId = line.split('\t')[0].split('/')[-1].replace("_assembly.fasta", '')
-					seqId = seqId.replace("_cat_reads.fastq.gz", '')
-
-				seqName = line.split('\t')[0].split('/')[-1].replace("_assembly.fasta",'')
-				seqName = seqName.replace("_cat_reads.fastq.gz",'')
-
 				if mashDist :
 					dist = line.split('\t')[1]
+					seqName = line.split('\t')[0].split(
+						'/')[-1].replace("_assembly.fasta", '')
+					seqName = seqName.replace("_cat_reads.fastq.gz", '')
 				else :
+					seqId = line.split('\t')[0].split('/')[-1].replace("_assembly.fasta", '')
+					seqId = seqId.replace("_cat_reads.fastq.gz", '')
+					seqName = line.split('\t')[1].split(
+						'/')[-1].replace("_assembly.fasta", '')
+					seqName = seqName.replace("_cat_reads.fastq.gz", '')
 					nbKmerIdentical = int(line.split('\t')[4].split('/')[0])
 					nbKmerTotal = int(line.split('\t')[4].split('/')[1])
 					dist = str(nbKmerTotal - nbKmerIdentical)
