@@ -167,24 +167,27 @@ def make_dist_matrix(distTable_files, mashDist):
 		distFile.close()
 		os.system("rm " + distTable_file)
 
-
+		dicoSeq = {}
 		for line in lines :
 
 			line = line.rstrip() # supprime retour chariot
 
-			if line[0]=="#" :
+			if mashDist and line[0] == "#":
 				seqId = line.split('\t')[1].split('/')[-1].replace("_assembly.fasta",'')
-				seqId = seqId.replace("_cat_reads.fastq.gz",'')
-				dicoSeq = {}
+				seqId = seqId.replace("_cat_reads.fastq.gz",'')	
 
 			else :	
+
+				if not mashDist :
+					seqId = line.split('\t')[0].split('/')[-1].replace("_assembly.fasta", '')
+					seqId = seqId.replace("_cat_reads.fastq.gz", '')
+
 				seqName = line.split('\t')[0].split('/')[-1].replace("_assembly.fasta",'')
 				seqName = seqName.replace("_cat_reads.fastq.gz",'')
 
 				if mashDist :
 					dist = line.split('\t')[1]
 				else :
-					print line
 					nbKmerIdentical = int(line.split('\t')[4].split('/')[0])
 					nbKmerTotal = int(line.split('\t')[4].split('/')[1])
 					dist = str(nbKmerTotal - nbKmerIdentical)
