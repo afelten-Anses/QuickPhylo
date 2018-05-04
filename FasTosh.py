@@ -184,6 +184,7 @@ def make_dist_matrix(distTable_files, mashDist):
 				if mashDist :
 					dist = line.split('\t')[1]
 				else :
+					print line
 					nbKmerIdentical = int(line.split('\t')[3].split('/')[0])
 					nbKmerTotal = int(line.split('\t')[3].split('/')[1])
 					dist = str(nbKmerTotal - nbKmerIdentical)
