@@ -35,7 +35,7 @@ def get_parser():
 						help='suppress sketch files (default:False)', default=False)
 
 	parser.add_argument('-k', action="store", dest='kmer_size', 
-						type=int, default='21', help='k-mer size (1-32) (default:21)')
+						type=int, default='15', help='k-mer size (1-32) (default:15)')
 
 	parser.add_argument('-s', action="store", dest='sketch_size', 
 						type=int, default='1000', help='sketch size = number of k-mer (default:1000)')
