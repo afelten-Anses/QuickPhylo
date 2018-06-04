@@ -40,7 +40,7 @@ Parameters
 * -i : tsv file containing paths to reads, asssembly or/and sketched files, more than 2 (REQUIRED)
 * -o : output tsv matrix name (default:output)
 * -T : maximum number of threads to use (default:1)
-* -k : k-mer size for sketching (default:21)
+* -k : k-mer size for sketching (default:15)
 * -s : sketch size = number of k-mer (default:1000)
 * -e : output newick tree name (default:output)
 
@@ -56,6 +56,6 @@ After installing Mash and dendropy you can test the script with the command line
 
 	mkdir test
 	cd test
-	python MashtoDist.py -T nbThreads -i input.tsv -o matrix_name -e tree_name
+	python FasTosh -T nbThreads -i input.tsv -o matrix_name -e tree_name
 
 	

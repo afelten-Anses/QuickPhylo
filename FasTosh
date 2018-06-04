@@ -26,7 +26,7 @@ def get_parser():
 						help='tsv file containing paths to reads, assembly or/and sketch files more than 2 (REQUIRED)')
 
 	parser.add_argument('-o', action="store", dest='output', 
-						type=str, default='output', help='output tsv name (default:output)')
+						type=str, default='output', help='output tsv matrix name (default:output)')
 
 	parser.add_argument('-T', action="store", dest='nbThreads', 
 						type=int, default='1', help='maximum number of threads to use (default:1)')
@@ -44,13 +44,13 @@ def get_parser():
 	#			type=str, required=True, help='mash matrix (REQUIRED)')
 	
 	parser.add_argument('-e', action="store", dest='OUTPUT',
-						type=str, default='output', help='output newick name (default:output)')    
+						type=str, default='output', help='output newick tree name (default:output)')    
 		
 	parser.add_argument('--UPGMA', dest='UPGMA', action='store_true',
 						help='use UPGMA algorithm (default:NJ)', default=False)
 
 	parser.add_argument('--nbKmerDiff', dest='nbKmerDiff', action='store_true',
-                     help='use the number of different kmer as distance instead of mash distance', default=False)
+                     help='use the number of different kmer as distance instead of mash distance (defaut:False)', default=False)
 
 	return parser
 
