@@ -120,7 +120,7 @@ def make_dist_tab(fasta_querie, fasta_targets, nbThreads, mashDist):
 	# lance mash pour comparer fasta_querie avec tout les assemblages de le liste fasta_targets
 	# la sortie de mash est écrite dans outputFile_name
 
-	outputFile_name = ''.join(fasta_querie.split("_")) + "_dist.tsv"
+	outputFile_name = "_".join(fasta_querie.split("_")[0:-1]) + "_dist.tsv"
 	outputFile = open(outputFile_name,'w')
 
 	if mashDist :
