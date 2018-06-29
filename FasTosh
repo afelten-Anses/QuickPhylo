@@ -120,7 +120,7 @@ def make_dist_tab(fasta_querie, fasta_targets, nbThreads, mashDist):
 	# lance mash pour comparer fasta_querie avec tout les assemblages de le liste fasta_targets
 	# la sortie de mash est écrite dans outputFile_name
 
-	outputFile_name = "_".join(fasta_querie.split("_")[0:-1]) + "_dist.tsv"
+	outputFile_name = fasta_querie.split('/')[-1] + "_dist.tsv"
 	outputFile = open(outputFile_name,'w')
 
 	if mashDist :
@@ -329,7 +329,7 @@ def main():
 
 	end = time.time()
 	total = round(end - begin,3)
-	print "Temps d'éxécution total: " + str(total) + " secondes"
+	print "Temps d'éxécution FasTosh: " + str(total) + " secondes"
 
 # lancer la fonction main()  au lancement du script
 if __name__ == "__main__":
