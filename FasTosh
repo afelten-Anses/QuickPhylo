@@ -280,6 +280,7 @@ def write_reroot_tree(reroot_tree, tree_file_name):
 	tree_file.close()
 
 	os.system("sed -i 's/\[&R\] //g' " + tree_file_name)
+	os.system("sed -i 's/\'//g' " + tree_file_name)
 
 
 ###########################
