@@ -31,6 +31,10 @@ The script has been developed with python 2.7 (tested with 2.7.12)
 * [Mash](https://github.com/marbl/Mash/blob/master/INSTALL.txt) tested with 2.0
 * [Dendropy](https://www.dendropy.org/) tested with 4.3.0
 
+Install with conda
+==================
+
+	conda install -c afelten fastosh
 
 Parameters
 ==========
