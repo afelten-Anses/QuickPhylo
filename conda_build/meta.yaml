@@ -1,0 +1,24 @@
+package:
+    name: "fastosh"
+    version: "0.1"
+
+source:
+    path: /home/afelten/Bureau/scratch/QuickPhylo/           
+
+requirements:
+    host:
+        - python    
+        - setuptools
+        - git
+
+    run:
+        - python=2.7 
+        - dendropy
+        - mash
+
+about:
+    home: https://github.com/afelten-Anses/QuickPhylo
+    license: GNU General Public v2 (GPLv2)
+    license_family: GPL2 
+    license_file: LICENSE
+    summary: Fast taxonomy with mash
