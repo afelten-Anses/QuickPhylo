@@ -121,7 +121,7 @@ def make_dist_tab(fasta_querie, fasta_targets, nbThreads, mashDist):
 	# la sortie de mash est écrite dans outputFile_name
 
 	outputFile_name = fasta_querie.split('/')[-1] + "_dist.tsv"
-	outputFile = open(outputFile_name,'w')
+	#outputFile = open(outputFile_name,'w')
 
 	if mashDist :
 		os.system("mash dist -t -p " + str(nbThreads) + " " + fasta_querie + \
@@ -131,7 +131,7 @@ def make_dist_tab(fasta_querie, fasta_targets, nbThreads, mashDist):
 		os.system("mash dist -p " + str(nbThreads) + " " + fasta_querie +
                     " " + " ".join(fasta_targets) + " > " + outputFile_name)
 
-	outputFile.close()
+	#outputFile.close()
 
 	return outputFile_name
 
